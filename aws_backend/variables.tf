@@ -1,12 +1,11 @@
-variable "tags" {
-    type = map(string)
-    default = {
-        Project = "achroma-fan-site"
-    }
+variable "code_artefacts_path" {
+  type = string
 }
 
-variable "aws_provider" {
+variable "deployment_info" {
   type = object({
+    project_name = string
+    environment = string
     region = string
   })
 }

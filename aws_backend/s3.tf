@@ -1,11 +1,7 @@
 resource "aws_s3_bucket" "achroma_db_landing" {
-  bucket = "achroma-db-landing-${data.aws_caller_identity.current.account_id}"
-
-  tags = var.tags
+  bucket = "achroma-db-landing-${local.resource_suffix}"
 }
 
 resource "aws_s3_bucket" "achroma_db_staging" {
-  bucket = "achroma-db-staging-${data.aws_caller_identity.current.account_id}"
-
-  tags = var.tags
+  bucket = "achroma-db-staging-${local.resource_suffix}"
 }

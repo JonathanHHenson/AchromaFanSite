@@ -8,5 +8,11 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_provider.region
+  region = var.deployment_info.region
+  default_tags {
+    tags = {
+      "Project"     = var.deployment_info.project_name
+      "Environment" = var.deployment_info.environment
+    }
+  }
 }
