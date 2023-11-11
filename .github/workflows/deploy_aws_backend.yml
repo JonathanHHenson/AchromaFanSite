@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v3
 
@@ -25,7 +24,7 @@ jobs:
       - name: Upload Code Artefacts
         uses: actions/upload-artifact@v3
         with:
-          name: code_artefacts_${{ vars.ENVIRONMENT }}
+          name: code_artefacts
           path: code_artefacts
 
   deploy-terraform:
@@ -70,7 +69,7 @@ jobs:
       - name: Download Code Artefacts
         uses: actions/download-artifact@v3
         with:
-          name: code_artefacts_${{ vars.ENVIRONMENT }}
+          name: code_artefacts
           # Extract the code artefacts to the code_artefacts directory
           path: ${{ github.workspace }}/code_artefacts
 
