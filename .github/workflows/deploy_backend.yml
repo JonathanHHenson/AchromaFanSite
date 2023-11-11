@@ -16,31 +16,18 @@ jobs:
 
       - name: Package Backend Code Modules
         run: |
-          mkdir -p code_artefacts
+          mkdir -p "code_artefacts"
 
           for file in backend_code/*; do
             relative_file=$(basename "$file")
             zip -r "code_artefacts/$relative_file.zip" "$file"
           done
 
-      - name: Generate tfvars
-        run: |
-          cat > aws_backend/terraform.tfvars <<- EOF
-          deployment_info = {
-            project_name = "${{ vars.PROJECT_NAME }}",
-            environment = "${{ vars.ENVIRONMENT }}",
-            region = "${{ vars.AWS_REGION }}",
-          }
-          code_artefacts_path = "${{ github.workspace }}/code_artefacts"
-          EOF
-
-      - name: Generate backend config
-        run: |
-          cat > aws_backend/backend.tfvars <<- EOF
-          bucket = "${{ secrets.TF_STATE_BUCKET }}"
-          key    = "${{ secrets.TF_STATE_KEY }}"
-          region = "${{ secrets.TF_STATE_REGION }}"
-          EOF
+      - name: Upload Code Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: code_artefacts_${{ vars.ENVIRONMENT }}
+          path: code_artefacts
 
   deploy-terraform:
     runs-on: ubuntu-latest
@@ -64,6 +51,14 @@ jobs:
         run: terraform fmt -check
         continue-on-error: true
 
+      - name: Generate backend config
+        run: |
+          cat > aws_backend/backend.tfvars <<- EOF
+          bucket = "${{ secrets.TF_STATE_BUCKET }}"
+          key    = "${{ secrets.TF_STATE_KEY }}"
+          region = "${{ secrets.TF_STATE_REGION }}"
+          EOF
+
       - name: Terraform Init
         id: init
         run: terraform init -backend-config=backend.tfvars
@@ -71,6 +66,23 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+
+      - name: Download Code Artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: code_artefacts_${{ vars.ENVIRONMENT }}
+          path: code_artefacts
+
+      - name: Generate tfvars
+        run: |
+          cat > aws_backend/terraform.tfvars <<- EOF
+          deployment_info = {
+            project_name = "${{ vars.PROJECT_NAME }}",
+            environment = "${{ vars.ENVIRONMENT }}",
+            region = "${{ vars.AWS_REGION }}",
+          }
+          code_artefacts_path = "${{ github.workspace }}/code_artefacts"
+          EOF
 
       - name: Terraform Plan
         id: plan
