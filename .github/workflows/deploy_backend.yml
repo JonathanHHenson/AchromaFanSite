@@ -27,7 +27,7 @@ jobs:
         run: |
           cat > aws_backend/terraform.tfvars <<- EOF
           deployment_info = {
-            project_name = "{{ vars.PROJECT_NAME }}",
+            project_name = "${{ vars.PROJECT_NAME }}",
             environment = "${{ vars.ENVIRONMENT }}",
             region = "${{ vars.AWS_REGION }}",
           }
