@@ -72,7 +72,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: code_artefacts_${{ vars.ENVIRONMENT }}
-          path: code_artefacts
+          # Extract the code artefacts to the code_artefacts directory
+          path: ${{ github.workspace }}/code_artefacts
 
       - name: Generate tfvars
         run: |
@@ -82,7 +83,7 @@ jobs:
             environment = "${{ vars.ENVIRONMENT }}",
             region = "${{ vars.AWS_REGION }}",
           }
-          code_artefacts_path = "code_artefacts"
+          code_artefacts_path = "${{ github.workspace }}/code_artefacts"
           EOF
 
       - name: Terraform Plan
