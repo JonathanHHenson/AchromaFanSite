@@ -37,6 +37,7 @@ jobs:
       run:
         working-directory: aws_backend
     steps:
+      - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v2
 
       - name: Configure AWS Credentials
