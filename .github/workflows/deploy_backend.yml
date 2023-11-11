@@ -68,7 +68,7 @@ jobs:
         run: terraform validate -no-color
 
       - name: Download Code Artefacts
-        uses: actions/upload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: code_artefacts_${{ vars.ENVIRONMENT }}
           path: code_artefacts
