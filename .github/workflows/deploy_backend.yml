@@ -54,7 +54,7 @@ jobs:
 
       - name: Generate backend config
         run: |
-          cat > aws_backend/backend.tfvars <<- EOF
+          cat > backend.tfvars <<- EOF
           bucket = "${{ secrets.TF_STATE_BUCKET }}"
           key    = "${{ secrets.TF_STATE_KEY }}"
           region = "${{ secrets.TF_STATE_REGION }}"
@@ -76,13 +76,13 @@ jobs:
 
       - name: Generate tfvars
         run: |
-          cat > aws_backend/terraform.tfvars <<- EOF
+          cat > terraform.tfvars <<- EOF
           deployment_info = {
             project_name = "${{ vars.PROJECT_NAME }}",
             environment = "${{ vars.ENVIRONMENT }}",
             region = "${{ vars.AWS_REGION }}",
           }
-          code_artefacts_path = "${{ github.workspace }}/code_artefacts"
+          code_artefacts_path = "code_artefacts"
           EOF
 
       - name: Terraform Plan
