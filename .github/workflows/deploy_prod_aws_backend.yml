@@ -9,21 +9,6 @@ on:
 
 jobs:
   deploy-prod:
-    runs-on: ubuntu-latest
-    environment: Prod
-    steps:
-      - uses: actions/checkout@v3
-
-      - run: ls ./.github/workflows/reusable
-
-      - uses: ./.github/workflows/reusable/deploy_aws_backend.yml
-        with:
-          environment: ${{ env.ENVIRONMENT }}
-          project_name: ${{ env.PROJECT_NAME }}
-          aws_region: ${{ env.AWS_REGION }}
-        env:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          tf_state_bucket: ${{ secrets.TF_STATE_BUCKET }}
-          tf_state_key: ${{ secrets.TF_STATE_KEY }}
-          tf_state_region: ${{ secrets.TF_STATE_REGION }}
+    uses: ./.github/workflows/reusable/deploy_aws_backend.yml
+    with:
+      environment: Prod

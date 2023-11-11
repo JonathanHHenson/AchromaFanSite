@@ -5,34 +5,11 @@ on:
         description: 'Environment to deploy to'
         type: string
         required: true
-      project_name:
-        description: 'Name of the project'
-        type: string
-        required: true
-      aws_region:
-        description: 'AWS region to deploy to'
-        type: string
-        required: true
-    secrets:
-      aws_access_key_id:
-        description: 'AWS access key ID'
-        required: true
-      aws_secret_access_key:
-        description: 'AWS secret access key'
-        required: true
-      tf_state_bucket:
-        description: 'Terraform state bucket'
-        required: true
-      tf_state_key:
-        description: 'Terraform state key'
-        required: true
-      tf_state_region:
-        description: 'Terraform state region'
-        required: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v3
 
@@ -48,11 +25,12 @@ jobs:
       - name: Upload Code Artefacts
         uses: actions/upload-artifact@v3
         with:
-          name: code_artefacts_${{ inputs.environment }}
+          name: code_artefacts_${{ vars.ENVIRONMENT }}
           path: code_artefacts
 
   deploy-terraform:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     needs: build
     defaults:
       run:
@@ -64,9 +42,9 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.aws_access_key_id }}
-          aws-secret-access-key: ${{ secrets.aws_secret_access_key }}
-          aws-region: ${{ inputs.aws_region }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Terraform fmt
         id: fmt
@@ -76,9 +54,9 @@ jobs:
       - name: Generate backend config
         run: |
           cat > backend.tfvars <<- EOF
-          bucket = "${{ secrets.tf_state_bucket }}"
-          key    = "${{ secrets.tf_state_key }}"
-          region = "${{ secrets.tf_state_region }}"
+          bucket = "${{ secrets.TF_STATE_BUCKET }}"
+          key    = "${{ secrets.TF_STATE_KEY }}"
+          region = "${{ secrets.TF_STATE_REGION }}"
           EOF
 
       - name: Terraform Init
@@ -92,7 +70,7 @@ jobs:
       - name: Download Code Artefacts
         uses: actions/download-artifact@v3
         with:
-          name: code_artefacts_${{ inputs.environment }}
+          name: code_artefacts_${{ vars.ENVIRONMENT }}
           # Extract the code artefacts to the code_artefacts directory
           path: ${{ github.workspace }}/code_artefacts
 
@@ -100,9 +78,9 @@ jobs:
         run: |
           cat > terraform.tfvars <<- EOF
           deployment_info = {
-            project_name = "${{ inputs.project_name }}",
-            environment = "${{ inputs.environment }}",
-            region = "${{ inputs.aws_region }}",
+            project_name = "${{ vars.PROJECT_NAME }}",
+            environment = "${{ vars.ENVIRONMENT }}",
+            region = "${{ vars.AWS_REGION }}",
           }
           code_artefacts_path = "${{ github.workspace }}/code_artefacts"
           EOF
