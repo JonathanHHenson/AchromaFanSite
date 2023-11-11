@@ -65,7 +65,7 @@ jobs:
         run: |
           cat > backend.tfvars <<- EOF
           bucket = "${{ secrets.TF_STATE_BUCKET }}"
-          key    = "${{ secrets.TF_STATE_KEY }}"
+          key    = "${{ vars.PROJECT_NAME }}/${{ vars.ENVIRONMENT }}.tfstate"
           region = "${{ secrets.TF_STATE_REGION }}"
           EOF
 
