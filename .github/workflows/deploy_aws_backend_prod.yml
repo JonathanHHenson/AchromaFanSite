@@ -9,6 +9,6 @@ on:
 
 jobs:
   deploy-prod:
-    uses: ./.github/workflows/reusable/deploy_aws_backend.yml
+    uses: ./.github/workflows/deploy_aws_backend.yml
     with:
       environment: Prod
