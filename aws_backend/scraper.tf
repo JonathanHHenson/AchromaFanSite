@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "scraper_agent" {
+data "aws_iam_policy_document" "scraper_agent_assume_role" {
   statement {
     effect = "Allow"
 
@@ -9,6 +9,9 @@ data "aws_iam_policy_document" "scraper_agent" {
 
     actions = ["sts:AssumeRole"]
   }
+}
+
+data "aws_iam_policy_document" "scraper_agent" {
   statement {
     effect = "Allow"
 
@@ -27,7 +30,11 @@ data "aws_iam_policy_document" "scraper_agent" {
 
 resource "aws_iam_role" "scraper_agent" {
   name               = "scraper-agent-${local.resource_suffix}"
-  assume_role_policy = data.aws_iam_policy_document.scraper_agent.json
+  assume_role_policy = data.aws_iam_policy_document.scraper_agent_assume_role.json
+  inline_policy {
+    name   = "scraper-agent-${local.resource_suffix}"
+    policy = data.aws_iam_policy_document.scraper_agent.json
+  }
 }
 
 resource "aws_lambda_function" "scraper_agent" {
