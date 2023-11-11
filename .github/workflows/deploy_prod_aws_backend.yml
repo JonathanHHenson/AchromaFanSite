@@ -1,0 +1,25 @@
+name: [Prod] Deploy AWS Backend
+
+on:
+  push:
+    branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - uses: ./.github/workflows/reusable/deploy_aws_backend.yml
+        with:
+          environment: ${{ env.ENVIRONMENT }}
+          project_name: ${{ env.PROJECT_NAME }}
+          aws_region: ${{ env.AWS_REGION }}
+        env:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          tf_state_bucket: ${{ secrets.TF_STATE_BUCKET }}
+          tf_state_key: ${{ secrets.TF_STATE_KEY }}
+          tf_state_region: ${{ secrets.TF_STATE_REGION }}
