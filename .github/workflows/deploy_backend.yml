@@ -27,9 +27,9 @@ jobs:
         run: |
           cat > aws_backend/terraform.tfvars <<- EOF
           deployment_info = {
-            project_name = ""{{ env.PROJECT_NAME }}",
-            environment = "${{ env.ENVIRONMENT }}",
-            region = "${{ env.AWS_REGION }}",
+            project_name = ""{{ vars.PROJECT_NAME }}",
+            environment = "${{ vars.ENVIRONMENT }}",
+            region = "${{ vars.AWS_REGION }}",
           }
           code_artefacts_path = "${{ github.workspace }}/code_artefacts"
           EOF
@@ -58,7 +58,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Terraform fmt
         id: fmt
