@@ -33,12 +33,24 @@ jobs:
           code_artefacts_path = "${{ github.workspace }}/code_artefacts"
           EOF
 
-  deploy:
+      - name: Generate backend config
+        run: |
+          cat > aws_backend/backend.tfvars <<- EOF
+          bucket = "${{ secrets.TF_STATE_BUCKET }}"
+          key    = "${{ secrets.TF_STATE_KEY }}"
+          region = "${{ secrets.TF_STATE_REGION }}"
+          EOF
+
+  deploy-terraform:
     runs-on: ubuntu-latest
     environment: Dev
     needs: build
+    defaults:
+      run:
+        working-directory: aws_backend
     steps:
       - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v2
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -47,29 +59,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
       - name: Terraform Init
-        uses: hashicorp/terraform-github-actions@v0.2.1
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: "init"
-          tf_actions_working_dir: "aws_backend"
-          tf_actions_backend_config: |
-              bucket = "${{ secrets.TF_STATE_BUCKET }}"
-              key    = "${{ secrets.TF_STATE_KEY }}"
-              region = "${{ secrets.TF_STATE_REGION }}"
+        id: init
+        run: terraform init -backend-config=backend.tfvars
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
       - name: Terraform Plan
-        uses: hashicorp/terraform-github-actions@v0.2.1
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: "plan"
-          tf_actions_working_dir: "aws_backend"
-          tf_actions_plan_arguments: "-out=tfplan -var-file=terraform.tfvars"
+        id: plan
+        run: terraform plan -no-color -out=tfplan -var-file=terraform.tfvars
 
       - name: Terraform Apply
-        uses: hashicorp/terraform-github-actions@v0.2.1
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: "apply"
-          tf_actions_working_dir: "aws_backend"
-          tf_actions_plan_arguments: "tfplan"
+        id: apply
+        run: terraform apply -no-color -auto-approve tfplan
